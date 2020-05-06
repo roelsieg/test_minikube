@@ -1,0 +1,35 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: php-fpm-deployment
+spec:
+  selector:
+    matchLabels:
+      app: php-fpm
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: php-fpm
+    spec:
+      volumes:
+      - name: task-pv-storage
+        persistentVolumeClaim:
+          claimName: task-pv-claim
+      containers:
+      - name: php-fpm
+        image: php:7-fpm
+        volumeMounts:
+        - mountPath: "/var/www/html"
+          name: task-pv-storage
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: php-fpm-service
+spec:
+  selector:
+    app: php-fpm
+  ports:
+    - protocol: TCP
+      port: 9000
